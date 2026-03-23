@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ALKS Appendix 4.2(a) — Stationary Passenger Car
+  ═══════════════════════════════════════════════════
+  Сценарий:
+    • Красная Tesla Model3 (ego) стартует на прямом участке Town04
+      road_id=6, lane_id=-2, координаты из find_road.py
+    • Разгоняется до 50 км/ч (13.89 м/с)
+    • Синий Audi TT стоит неподвижно в 80м впереди по той же полосе
+    • Tesla тормозит и останавливается перед Audi (TTCCondition)
+    • Длительность сцены: 60 секунд
+-->
+<OpenSCENARIO>
+  <FileHeader
+    description="4.2a Stationary Passenger Car — ALKS Test"
+    author="ALKS_Test"
+    revMajor="1"
+    revMinor="0"
+    date="2024-01-01T00:00:00"/>
+
+  <ParameterDeclarations>
+    <!-- Скорость Tesla: 50 км/ч = 13.89 м/с -->
+    <ParameterDeclaration name="EgoSpeed"    parameterType="double" value="13.89"/>
+    <!-- Дистанция торможения до Audi -->
+    <ParameterDeclaration name="BrakeDistTTC" parameterType="double" value="3.5"/>
+    <!-- Длительность сценария -->
+    <ParameterDeclaration name="ScenarioDuration" parameterType="double" value="60.0"/>
+  </ParameterDeclarations>
+
+  <CatalogLocations/>
+
+  <RoadNetwork>
+    <!-- Town04: прямой участок 300м, road_id=6 -->
+    <LogicFile filepath="Town04"/>
+  </RoadNetwork>
+
+  <Entities>
+
+    <!-- ── EGO: красная Tesla Model3 ── -->
+    <ScenarioObject name="hero">
+      <Vehicle name="vehicle.tesla.model3" vehicleCategory="car">
+        <BoundingBox>
+          <Center x="1.5" y="0.0" z="0.9"/>
+          <Dimensions width="2.1" length="4.5" height="1.8"/>
+        </BoundingBox>
+        <Performance maxSpeed="69.0" maxAcceleration="10.0" maxDeceleration="10.0"/>
+        <Axles>
+          <FrontAxle maxSteering="0.5" wheelDiameter="0.6" trackWidth="1.8"
+                     positionX="3.1" positionZ="0.3"/>
+          <RearAxle  maxSteering="0.0" wheelDiameter="0.6" trackWidth="1.8"
+                     positionX="0.0" positionZ="0.3"/>
+        </Axles>
+        <Properties>
+          <Property name="type"  value="ego_vehicle"/>
+          <Property name="color" value="255,0,0"/>
+        </Properties>
+      </Vehicle>
+    </ScenarioObject>
+
+    <!-- ── OBSTACLE: синий Audi TT (стоит в полосе) ── -->
+    <ScenarioObject name="StationaryCar">
+      <Vehicle name="vehicle.audi.tt" vehicleCategory="car">
+        <BoundingBox>
+          <Center x="1.5" y="0.0" z="0.75"/>
+          <Dimensions width="2.0" length="4.0" height="1.5"/>
+        </BoundingBox>
+        <!-- maxSpeed=0: машина не движется -->
+        <Performance maxSpeed="0.0" maxAcceleration="0.0" maxDeceleration="0.0"/>
+        <Axles>
+          <FrontAxle maxSteering="0.0" wheelDiameter="0.6" trackWidth="1.8"
+                     positionX="2.7" positionZ="0.3"/>
+          <RearAxle  maxSteering="0.0" wheelDiameter="0.6" trackWidth="1.8"
+                     positionX="0.0" positionZ="0.3"/>
+        </Axles>
+        <Properties>
+          <Property name="type"  value="simulation"/>
+          <Property name="color" value="0,0,255"/>
+        </Properties>
+      </Vehicle>
+    </ScenarioObject>
+
+  </Entities>
+
+  <Storyboard>
+
+    <!-- ══ INIT: начальные позиции и скорости ══ -->
+    <Init>
+      <Actions>
+
+        <!-- Tesla: прямой участок 300м, yaw=90.36 (едет вдоль оси Y) -->
+        <Private entityRef="hero">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <WorldPosition x="-514.23" y="177.52" z="0.30" h="90.36"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+          <!-- Начальная скорость = 0 (разгон через SpeedAction) -->
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="step" value="0.0"
+                                     dynamicsDimension="time"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="0.0"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+        </Private>
+
+        <!-- Audi: 80м вперёд по той же полосе, неподвижен -->
+        <Private entityRef="StationaryCar">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <WorldPosition x="-514.37" y="259.08" z="0.30" h="90.36"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="step" value="0.0"
+                                     dynamicsDimension="time"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="0.0"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+        </Private>
+
+      </Actions>
+    </Init>
+
+    <!-- ══ STORY ══ -->
+    <Story name="Story_4_2a">
+
+      <!-- ── ACT 1: Tesla разгоняется и едет к Audi ── -->
+      <Act name="DriveToObstacle">
+
+        <ManeuverGroup name="EgoManeuverGroup" maximumExecutionCount="1">
+          <Actors selectTriggeringEntities="false">
+            <EntityRef entityRef="hero"/>
+          </Actors>
+
+          <Maneuver name="DriveManeuver">
+
+            <!-- Событие 1: разгон до 50 км/ч сразу после старта -->
+            <Event name="Accelerate" priority="overwrite">
+              <Action name="SetSpeed">
+                <PrivateAction>
+                  <LongitudinalAction>
+                    <SpeedAction>
+                      <!-- Линейный разгон за 3 секунды -->
+                      <SpeedActionDynamics dynamicsShape="linear" value="3.0"
+                                           dynamicsDimension="time"/>
+                      <SpeedActionTarget>
+                        <AbsoluteTargetSpeed value="$EgoSpeed"/>
+                      </SpeedActionTarget>
+                    </SpeedAction>
+                  </LongitudinalAction>
+                </PrivateAction>
+              </Action>
+              <StartTrigger>
+                <ConditionGroup>
+                  <Condition name="SimStart" delay="0" conditionEdge="none">
+                    <ByValueCondition>
+                      <SimulationTimeCondition value="0.5" rule="greaterThan"/>
+                    </ByValueCondition>
+                  </Condition>
+                </ConditionGroup>
+              </StartTrigger>
+            </Event>
+
+            <!-- Событие 2: экстренное торможение когда TTC <= 3.5 сек -->
+            <Event name="EmergencyBrake" priority="overwrite">
+              <Action name="BrakeToStop">
+                <PrivateAction>
+                  <LongitudinalAction>
+                    <SpeedAction>
+                      <!-- Торможение: 8 м/с² до полной остановки -->
+                      <SpeedActionDynamics dynamicsShape="linear" value="8.0"
+                                           dynamicsDimension="rate"/>
+                      <SpeedActionTarget>
+                        <AbsoluteTargetSpeed value="0.0"/>
+                      </SpeedActionTarget>
+                    </SpeedAction>
+                  </LongitudinalAction>
+                </PrivateAction>
+              </Action>
+              <StartTrigger>
+                <ConditionGroup>
+                  <Condition name="TTCtoAudi" delay="0" conditionEdge="rising">
+                    <ByEntityCondition>
+                      <TriggeringEntities triggeringEntitiesRule="any">
+                        <EntityRef entityRef="hero"/>
+                      </TriggeringEntities>
+                      <EntityCondition>
+                        <TimeToCollisionCondition
+                          value="$BrakeDistTTC"
+                          freespace="true"
+                          alongRoute="true"
+                          rule="lessThan">
+                          <TimeToCollisionConditionTarget>
+                            <EntityRef entityRef="StationaryCar"/>
+                          </TimeToCollisionConditionTarget>
+                        </TimeToCollisionCondition>
+                      </EntityCondition>
+                    </ByEntityCondition>
+                  </Condition>
+                </ConditionGroup>
+              </StartTrigger>
+            </Event>
+
+          </Maneuver>
+        </ManeuverGroup>
+
+        <!-- Act стартует сразу -->
+        <StartTrigger>
+          <ConditionGroup>
+            <Condition name="ActStart" delay="0" conditionEdge="none">
+              <ByValueCondition>
+                <SimulationTimeCondition value="0.0" rule="greaterThan"/>
+              </ByValueCondition>
+            </Condition>
+          </ConditionGroup>
+        </StartTrigger>
+
+        <!-- Act завершается через 60 секунд -->
+        <StopTrigger>
+          <ConditionGroup>
+            <Condition name="ActEnd" delay="0" conditionEdge="none">
+              <ByValueCondition>
+                <SimulationTimeCondition value="$ScenarioDuration" rule="greaterThan"/>
+              </ByValueCondition>
+            </Condition>
+          </ConditionGroup>
+        </StopTrigger>
+
+      </Act>
+    </Story>
+
+    <!-- Глобальная остановка симуляции -->
+    <StopTrigger>
+      <ConditionGroup>
+        <Condition name="SimEnd" delay="0" conditionEdge="none">
+          <ByValueCondition>
+            <SimulationTimeCondition value="$ScenarioDuration" rule="greaterThan"/>
+          </ByValueCondition>
+        </Condition>
+      </ConditionGroup>
+    </StopTrigger>
+
+  </Storyboard>
+</OpenSCENARIO>
