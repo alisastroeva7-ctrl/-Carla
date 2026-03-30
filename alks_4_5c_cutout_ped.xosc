@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSCENARIO>
+  <FileHeader description="ALKS 4.5c - Cut-out reveals stationary pedestrian" author="ALKS_Test" revMajor="1" revMinor="0" date="2025-01-01T00:00:00"/>
+  <ParameterDeclarations/>
+  <CatalogLocations/>
+  <RoadNetwork>
+    <LogicFile filepath="D:\files\alks_highway.xodr"/>
+  </RoadNetwork>
+  <Entities>
+  <ScenarioObject name="Ego">
+      <Vehicle name="vehicle.tesla.model3" vehicleCategory="car">
+        <BoundingBox><Center x="1.5" y="0.0" z="0.9"/><Dimensions width="2.1" length="4.69" height="1.81"/></BoundingBox>
+        <Performance maxSpeed="69.44" maxAcceleration="10.0" maxDeceleration="10.0"/>
+        <Axles>
+          <FrontAxle maxSteering="0.5236" wheelDiameter="0.623" trackWidth="1.8" positionX="3.1" positionZ="0.312"/>
+          <RearAxle  maxSteering="0.0"    wheelDiameter="0.623" trackWidth="1.8" positionX="0.0" positionZ="0.312"/>
+        </Axles>
+        <Properties>
+          <Property name="type" value="ego_vehicle"/>
+          <Property name="role_name" value="hero"/>
+        </Properties>
+      </Vehicle>
+    </ScenarioObject>
+  <ScenarioObject name="Lead">
+      <Vehicle name="vehicle.audi.a2" vehicleCategory="car">
+        <BoundingBox><Center x="1.5" y="0.0" z="0.8"/><Dimensions width="1.9" length="4.2" height="1.5"/></BoundingBox>
+        <Performance maxSpeed="69.44" maxAcceleration="8.0" maxDeceleration="10.0"/>
+        <Axles>
+          <FrontAxle maxSteering="0.5" wheelDiameter="0.6" trackWidth="1.7" positionX="2.7" positionZ="0.3"/>
+          <RearAxle  maxSteering="0.0" wheelDiameter="0.6" trackWidth="1.7" positionX="0.0" positionZ="0.3"/>
+        </Axles>
+        <Properties><Property name="type" value="simulation"/></Properties>
+      </Vehicle>
+    </ScenarioObject>
+  <ScenarioObject name="Obst">
+      <Pedestrian name="walker.pedestrian.0001" pedestrianCategory="pedestrian">
+        <BoundingBox><Center x="0.0" y="0.0" z="0.9"/><Dimensions width="0.6" length="0.6" height="1.8"/></BoundingBox>
+        <Properties><Property name="type" value="simulation"/></Properties>
+      </Pedestrian>
+    </ScenarioObject>
+  </Entities>
+  <Storyboard>
+    <Init><Actions>
+      <Private entityRef="Ego">
+        <PrivateAction><TeleportAction><Position>
+          <LanePosition roadId="1" laneId="-2" s="50" offset="0.0"/>
+        </Position></TeleportAction></PrivateAction>
+        <PrivateAction><LongitudinalAction><SpeedAction>
+          <SpeedActionDynamics dynamicsShape="step" value="0.0" dynamicsDimension="time"/>
+          <SpeedActionTarget><AbsoluteTargetSpeed value="27.78"/></SpeedActionTarget>
+        </SpeedAction></LongitudinalAction></PrivateAction>
+      </Private>
+      <Private entityRef="Lead">
+        <PrivateAction><TeleportAction><Position>
+          <LanePosition roadId="1" laneId="-2" s="150" offset="0.0"/>
+        </Position></TeleportAction></PrivateAction>
+        <PrivateAction><LongitudinalAction><SpeedAction>
+          <SpeedActionDynamics dynamicsShape="step" value="0.0" dynamicsDimension="time"/>
+          <SpeedActionTarget><AbsoluteTargetSpeed value="27.78"/></SpeedActionTarget>
+        </SpeedAction></LongitudinalAction></PrivateAction>
+      </Private>
+      <Private entityRef="Obst">
+        <PrivateAction><TeleportAction><Position>
+          <LanePosition roadId="1" laneId="-2" s="400" offset="0.0"/>
+        </Position></TeleportAction></PrivateAction>
+        <PrivateAction><LongitudinalAction><SpeedAction>
+          <SpeedActionDynamics dynamicsShape="step" value="0.0" dynamicsDimension="time"/>
+          <SpeedActionTarget><AbsoluteTargetSpeed value="0.0"/></SpeedActionTarget>
+        </SpeedAction></LongitudinalAction></PrivateAction>
+      </Private>
+    </Actions></Init>
+    <Story name="S45c">
+      <Act name="Act">
+        <ManeuverGroup name="MG_Lead" maximumExecutionCount="1">
+          <Actors selectTriggeringEntities="false"><EntityRef entityRef="Lead"/></Actors>
+          <Maneuver name="M_Lead">
+            <Event name="Ev_Cutout" priority="overwrite">
+              <Action name="A_Cutout">
+                <PrivateAction><LateralAction><LaneChangeAction>
+                  <LaneChangeActionDynamics dynamicsShape="sinusoidal" value="3.0" dynamicsDimension="time"/>
+                  <LaneChangeTarget><AbsoluteTargetLane value="-1"/></LaneChangeTarget>
+                </LaneChangeAction></LateralAction></PrivateAction>
+              </Action>
+              <StartTrigger><ConditionGroup><Condition name="C_dist" delay="0.0" conditionEdge="rising">
+                <ByEntityCondition>
+                  <TriggeringEntities triggeringEntitiesRule="any"><EntityRef entityRef="Lead"/></TriggeringEntities>
+                  <EntityCondition><ReachPositionCondition tolerance="80.0">
+                    <Position><LanePosition roadId="1" laneId="-2" s="200" offset="0.0"/></Position>
+                  </ReachPositionCondition></EntityCondition>
+                </ByEntityCondition>
+              </Condition></ConditionGroup></StartTrigger>
+            </Event>
+          </Maneuver>
+        </ManeuverGroup>
+        <ManeuverGroup name="MG_EgoBrake" maximumExecutionCount="1">
+          <Actors selectTriggeringEntities="false"><EntityRef entityRef="Ego"/></Actors>
+          <Maneuver name="M_EgoBrake">
+            <Event name="Ev_EBrake" priority="overwrite">
+              <Action name="A_EBrake">
+                <PrivateAction><LongitudinalAction><SpeedAction>
+                  <SpeedActionDynamics dynamicsShape="linear" value="5.0" dynamicsDimension="time"/>
+                  <SpeedActionTarget><AbsoluteTargetSpeed value="0.0"/></SpeedActionTarget>
+                </SpeedAction></LongitudinalAction></PrivateAction>
+              </Action>
+              <StartTrigger><ConditionGroup><Condition name="C_EBrake" delay="0.0" conditionEdge="rising">
+                <ByValueCondition><SimulationTimeCondition value="8.0" rule="greaterThan"/></ByValueCondition>
+              </Condition></ConditionGroup></StartTrigger>
+            </Event>
+          </Maneuver>
+        </ManeuverGroup>
+        <StartTrigger><ConditionGroup><Condition name="CS" delay="0.0" conditionEdge="none">
+          <ByValueCondition><SimulationTimeCondition value="0.0" rule="greaterThan"/></ByValueCondition>
+        </Condition></ConditionGroup></StartTrigger>
+        <StopTrigger><ConditionGroup><Condition name="CE" delay="0.0" conditionEdge="none">
+          <ByValueCondition><SimulationTimeCondition value="55" rule="greaterThan"/></ByValueCondition>
+        </Condition></ConditionGroup></StopTrigger>
+      </Act>
+    </Story>
+    <StopTrigger><ConditionGroup><Condition name="CG" delay="0.0" conditionEdge="none">
+      <ByValueCondition><SimulationTimeCondition value="55" rule="greaterThan"/></ByValueCondition>
+    </Condition></ConditionGroup></StopTrigger>
+  </Storyboard>
+</OpenSCENARIO>

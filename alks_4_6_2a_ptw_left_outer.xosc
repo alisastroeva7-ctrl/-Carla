@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSCENARIO>
+  <FileHeader description="ALKS 4.6.2a - PTW on outer edge of left adjacent lane" author="ALKS_Test" revMajor="1" revMinor="0" date="2025-01-01T00:00:00"/>
+  <ParameterDeclarations/>
+  <CatalogLocations/>
+  <RoadNetwork>
+    <LogicFile filepath="D:\files\alks_highway.xodr"/>
+  </RoadNetwork>
+  <Entities>
+  <ScenarioObject name="Ego">
+      <Vehicle name="vehicle.tesla.model3" vehicleCategory="car">
+        <BoundingBox><Center x="1.5" y="0.0" z="0.9"/><Dimensions width="2.1" length="4.69" height="1.81"/></BoundingBox>
+        <Performance maxSpeed="69.44" maxAcceleration="10.0" maxDeceleration="10.0"/>
+        <Axles>
+          <FrontAxle maxSteering="0.5236" wheelDiameter="0.623" trackWidth="1.8" positionX="3.1" positionZ="0.312"/>
+          <RearAxle  maxSteering="0.0"    wheelDiameter="0.623" trackWidth="1.8" positionX="0.0" positionZ="0.312"/>
+        </Axles>
+        <Properties>
+          <Property name="type" value="ego_vehicle"/>
+          <Property name="role_name" value="hero"/>
+        </Properties>
+      </Vehicle>
+    </ScenarioObject>
+  <ScenarioObject name="PTW">
+      <Vehicle name="vehicle.kawasaki.ninja" vehicleCategory="motorbike">
+        <BoundingBox><Center x="0.9" y="0.0" z="0.65"/><Dimensions width="0.9" length="2.1" height="1.3"/></BoundingBox>
+        <Performance maxSpeed="69.44" maxAcceleration="7.0" maxDeceleration="8.0"/>
+        <Axles>
+          <FrontAxle maxSteering="0.6" wheelDiameter="0.6" trackWidth="0.0" positionX="1.5" positionZ="0.3"/>
+          <RearAxle  maxSteering="0.0" wheelDiameter="0.6" trackWidth="0.0" positionX="0.0" positionZ="0.3"/>
+        </Axles>
+        <Properties><Property name="type" value="simulation"/></Properties>
+      </Vehicle>
+    </ScenarioObject>
+  </Entities>
+  <Storyboard>
+    <Init><Actions>
+      <Private entityRef="Ego">
+        <PrivateAction><TeleportAction><Position>
+          <LanePosition roadId="1" laneId="-2" s="50" offset="0.0"/>
+        </Position></TeleportAction></PrivateAction>
+        <PrivateAction><LongitudinalAction><SpeedAction>
+          <SpeedActionDynamics dynamicsShape="step" value="0.0" dynamicsDimension="time"/>
+          <SpeedActionTarget><AbsoluteTargetSpeed value="27.78"/></SpeedActionTarget>
+        </SpeedAction></LongitudinalAction></PrivateAction>
+      </Private>
+      <Private entityRef="PTW">
+        <PrivateAction><TeleportAction><Position>
+          <LanePosition roadId="1" laneId="-1" s="350" offset="1.5"/>
+        </Position></TeleportAction></PrivateAction>
+        <PrivateAction><LongitudinalAction><SpeedAction>
+          <SpeedActionDynamics dynamicsShape="step" value="0.0" dynamicsDimension="time"/>
+          <SpeedActionTarget><AbsoluteTargetSpeed value="20.0"/></SpeedActionTarget>
+        </SpeedAction></LongitudinalAction></PrivateAction>
+      </Private>
+    </Actions></Init>
+    <Story name="S462a">
+      <Act name="Act">
+        <ManeuverGroup name="MG" maximumExecutionCount="1">
+          <Actors selectTriggeringEntities="false"><EntityRef entityRef="Ego"/></Actors>
+          <Maneuver name="M">
+            <Event name="Ev" priority="overwrite">
+              <Action name="A">
+                <PrivateAction><LongitudinalAction><SpeedAction>
+                  <SpeedActionDynamics dynamicsShape="step" value="0.0" dynamicsDimension="time"/>
+                  <SpeedActionTarget><AbsoluteTargetSpeed value="27.78"/></SpeedActionTarget>
+                </SpeedAction></LongitudinalAction></PrivateAction>
+              </Action>
+              <StartTrigger><ConditionGroup><Condition name="C0" delay="0.0" conditionEdge="none">
+                <ByValueCondition><SimulationTimeCondition value="0.0" rule="greaterThan"/></ByValueCondition>
+              </Condition></ConditionGroup></StartTrigger>
+            </Event>
+          </Maneuver>
+        </ManeuverGroup>
+        <StartTrigger><ConditionGroup><Condition name="CS" delay="0.0" conditionEdge="none">
+          <ByValueCondition><SimulationTimeCondition value="0.0" rule="greaterThan"/></ByValueCondition>
+        </Condition></ConditionGroup></StartTrigger>
+        <StopTrigger><ConditionGroup><Condition name="CE" delay="0.0" conditionEdge="none">
+          <ByValueCondition><SimulationTimeCondition value="40" rule="greaterThan"/></ByValueCondition>
+        </Condition></ConditionGroup></StopTrigger>
+      </Act>
+    </Story>
+    <StopTrigger><ConditionGroup><Condition name="CG" delay="0.0" conditionEdge="none">
+      <ByValueCondition><SimulationTimeCondition value="40" rule="greaterThan"/></ByValueCondition>
+    </Condition></ConditionGroup></StopTrigger>
+  </Storyboard>
+</OpenSCENARIO>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSCENARIO>
+  <FileHeader description="ALKS 4.4b - Car cut-in then decelerates" author="ALKS_Test" revMajor="1" revMinor="0" date="2025-01-01T00:00:00"/>
+  <ParameterDeclarations/>
+  <CatalogLocations/>
+  <RoadNetwork>
+    <LogicFile filepath="D:\files\alks_highway.xodr"/>
+  </RoadNetwork>
+  <Entities>
+  <ScenarioObject name="Ego">
+      <Vehicle name="vehicle.tesla.model3" vehicleCategory="car">
+        <BoundingBox><Center x="1.5" y="0.0" z="0.9"/><Dimensions width="2.1" length="4.69" height="1.81"/></BoundingBox>
+        <Performance maxSpeed="69.44" maxAcceleration="10.0" maxDeceleration="10.0"/>
+        <Axles>
+          <FrontAxle maxSteering="0.5236" wheelDiameter="0.623" trackWidth="1.8" positionX="3.1" positionZ="0.312"/>
+          <RearAxle  maxSteering="0.0"    wheelDiameter="0.623" trackWidth="1.8" positionX="0.0" positionZ="0.312"/>
+        </Axles>
+        <Properties>
+          <Property name="type" value="ego_vehicle"/>
+          <Property name="role_name" value="hero"/>
+        </Properties>
+      </Vehicle>
+    </ScenarioObject>
+  <ScenarioObject name="CutIn">
+      <Vehicle name="vehicle.audi.a2" vehicleCategory="car">
+        <BoundingBox><Center x="1.5" y="0.0" z="0.8"/><Dimensions width="1.9" length="4.2" height="1.5"/></BoundingBox>
+        <Performance maxSpeed="69.44" maxAcceleration="8.0" maxDeceleration="10.0"/>
+        <Axles>
+          <FrontAxle maxSteering="0.5" wheelDiameter="0.6" trackWidth="1.7" positionX="2.7" positionZ="0.3"/>
+          <RearAxle  maxSteering="0.0" wheelDiameter="0.6" trackWidth="1.7" positionX="0.0" positionZ="0.3"/>
+        </Axles>
+        <Properties><Property name="type" value="simulation"/></Properties>
+      </Vehicle>
+    </ScenarioObject>
+  </Entities>
+  <Storyboard>
+    <Init><Actions>
+      <Private entityRef="Ego">
+        <PrivateAction><TeleportAction><Position>
+          <LanePosition roadId="1" laneId="-2" s="50" offset="0.0"/>
+        </Position></TeleportAction></PrivateAction>
+        <PrivateAction><LongitudinalAction><SpeedAction>
+          <SpeedActionDynamics dynamicsShape="step" value="0.0" dynamicsDimension="time"/>
+          <SpeedActionTarget><AbsoluteTargetSpeed value="27.78"/></SpeedActionTarget>
+        </SpeedAction></LongitudinalAction></PrivateAction>
+      </Private>
+      <Private entityRef="CutIn">
+        <PrivateAction><TeleportAction><Position>
+          <LanePosition roadId="1" laneId="-1" s="80" offset="0.0"/>
+        </Position></TeleportAction></PrivateAction>
+        <PrivateAction><LongitudinalAction><SpeedAction>
+          <SpeedActionDynamics dynamicsShape="step" value="0.0" dynamicsDimension="time"/>
+          <SpeedActionTarget><AbsoluteTargetSpeed value="27.78"/></SpeedActionTarget>
+        </SpeedAction></LongitudinalAction></PrivateAction>
+      </Private>
+    </Actions></Init>
+    <Story name="S44b">
+      <Act name="Act">
+        <ManeuverGroup name="MG_CutIn" maximumExecutionCount="1">
+          <Actors selectTriggeringEntities="false"><EntityRef entityRef="CutIn"/></Actors>
+          <Maneuver name="M_CutIn">
+            <Event name="Ev_CI" priority="overwrite">
+              <Action name="A_CI">
+                <PrivateAction><LateralAction><LaneChangeAction>
+                  <LaneChangeActionDynamics dynamicsShape="sinusoidal" value="3.0" dynamicsDimension="time"/>
+                  <LaneChangeTarget><RelativeTargetLane entityRef="Ego" value="0"/></LaneChangeTarget>
+                </LaneChangeAction></LateralAction></PrivateAction>
+              </Action>
+              <StartTrigger><ConditionGroup><Condition name="C_CI" delay="0.0" conditionEdge="rising">
+                <ByValueCondition><SimulationTimeCondition value="15" rule="greaterThan"/></ByValueCondition>
+              </Condition></ConditionGroup></StartTrigger>
+            </Event>
+            <Event name="Ev_Brk" priority="overwrite">
+              <Action name="A_Brk">
+                <PrivateAction><LongitudinalAction><SpeedAction>
+                  <SpeedActionDynamics dynamicsShape="linear" value="5.0" dynamicsDimension="time"/>
+                  <SpeedActionTarget><AbsoluteTargetSpeed value="18.0"/></SpeedActionTarget>
+                </SpeedAction></LongitudinalAction></PrivateAction>
+              </Action>
+              <StartTrigger><ConditionGroup><Condition name="C_Brk" delay="0.0" conditionEdge="rising">
+                <ByValueCondition><SimulationTimeCondition value="19" rule="greaterThan"/></ByValueCondition>
+              </Condition></ConditionGroup></StartTrigger>
+            </Event>          </Maneuver>
+        </ManeuverGroup>
+        <StartTrigger><ConditionGroup><Condition name="CS" delay="0.0" conditionEdge="none">
+          <ByValueCondition><SimulationTimeCondition value="0.0" rule="greaterThan"/></ByValueCondition>
+        </Condition></ConditionGroup></StartTrigger>
+        <StopTrigger><ConditionGroup><Condition name="CE" delay="0.0" conditionEdge="none">
+          <ByValueCondition><SimulationTimeCondition value="50" rule="greaterThan"/></ByValueCondition>
+        </Condition></ConditionGroup></StopTrigger>
+      </Act>
+    </Story>
+    <StopTrigger><ConditionGroup><Condition name="CG" delay="0.0" conditionEdge="none">
+      <ByValueCondition><SimulationTimeCondition value="50" rule="greaterThan"/></ByValueCondition>
+    </Condition></ConditionGroup></StopTrigger>
+  </Storyboard>
+</OpenSCENARIO>
